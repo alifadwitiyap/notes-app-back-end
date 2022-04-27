@@ -10,6 +10,15 @@ class UsersService {
         this._pool = new Pool()
     }
 
+    async getUsersByUsername(username) {
+        const query = {
+            text: 'SELECT id, username, fullname FROM users WHERE username LIKE $1',
+            values: [ `%${username}%` ],
+        };
+        const result = await this._pool.query(query);
+        return result.rows;
+    }
+
     async addUser({ username, password, fullname }) {
         await this.verifyNewUsername(username)
 
@@ -18,7 +27,7 @@ class UsersService {
 
         const query = {
             text: 'INSERT INTO users VALUES($1, $2, $3, $4) RETURNING id',
-            values: [id, username, hashedPassword, fullname],
+            values: [ id, username, hashedPassword, fullname ],
         };
 
         const result = await this._pool.query(query);
@@ -27,14 +36,14 @@ class UsersService {
             throw new InvariantError('User gagal ditambahkan');
         }
 
-        return result.rows[0].id
+        return result.rows[ 0 ].id
 
     }
 
     async verifyNewUsername(username) {
         const query = {
             text: 'SELECT username FROM users WHERE username = $1',
-            values: [username],
+            values: [ username ],
         };
 
         const result = await this._pool.query(query);
@@ -47,7 +56,7 @@ class UsersService {
     async getUserById(userId) {
         const query = {
             text: 'SELECT id, username, fullname FROM users WHERE id = $1',
-            values: [userId],
+            values: [ userId ],
         };
 
         const result = await this._pool.query(query);
@@ -56,13 +65,13 @@ class UsersService {
             throw new NotFoundError('User tidak ditemukan');
         }
 
-        return result.rows[0];
+        return result.rows[ 0 ];
     }
 
     async verifyUserCredential(username, password) {
         const query = {
             text: 'SELECT id, password FROM users WHERE username = $1',
-            values: [username],
+            values: [ username ],
         };
 
         const result = await this._pool.query(query)
@@ -71,7 +80,7 @@ class UsersService {
             throw new AuthenticationError('Kredensial yang Anda berikan salah')
         }
 
-        const { id, password: hashedPassword } = result.rows[0]
+        const { id, password: hashedPassword } = result.rows[ 0 ]
         const match = await bcrypt.compare(password, hashedPassword)
 
         if (!match) {

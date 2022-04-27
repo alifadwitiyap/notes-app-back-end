@@ -1,4 +1,4 @@
-module.exports= (handler) => [
+module.exports = (handler) => [
     {
         method: 'POST',
         path: '/users',
@@ -8,5 +8,9 @@ module.exports= (handler) => [
         method: 'GET',
         path: '/users/{id}',
         handler: handler.getUserByIdHandler,
+    }, {
+        method: 'GET',
+        path: '/users',
+        handler: handler.getUsersByUsernameHandler,
     },
 ];

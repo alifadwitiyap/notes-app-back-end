@@ -3,11 +3,13 @@ const { nanoid } = require('nanoid');
 const NotFoundError = require('../../exception/NotFoundError');
 const InvariantError = require('../../exception/InvariantError');
 const AuthorizationError = require('../../exception/AuthorizationError ');
+const mapDBToModel = require('../../utils');
 
 class NotesService {
     constructor(collaborationService) {
         this._pool = new Pool()
         this._collaborationService = collaborationService
+
     }
 
     async addNote({ title, body, tags, owner }) {
@@ -24,30 +26,35 @@ class NotesService {
         if (!result.rows[ 0 ].id) {
             throw new InvariantError('Catatan gagal ditambahkan')
         }
-
         return result.rows[ 0 ].id
     }
 
     async getNotes(owner) {
         const query = {
-            text: 'SELECT * FROM notes WHERE owner = $1',
+            text: `SELECT notes.* FROM notes
+                    LEFT JOIN collaborations ON collaborations.note_id = notes.id
+                    WHERE notes.owner = $1 OR collaborations.user_id = $1
+                    GROUP BY notes.id`,
             values: [ owner ],
         };
         const result = await this._pool.query(query);
+
         return result.rows;
     }
 
     async getNoteById(id) {
         const query = {
-            text: 'SELECT * FROM notes WHERE id = $1',
+            text: `SELECT notes.*, users.username
+            FROM notes
+            LEFT JOIN users ON users.id = notes.owner
+            WHERE notes.id = $1`,
             values: [ id ],
         }
         const result = await this._pool.query(query)
         if (!result.rows.length) {
             throw new NotFoundError('Catatan tidak ditemukan')
         }
-        return result.rows[ 0 ]
-
+        return result.rows.map(mapDBToModel)[ 0 ];
     }
 
     async editNoteById(id, { title, body, tags }) {
@@ -61,7 +68,6 @@ class NotesService {
         if (!result.rows.length) {
             throw new NotFoundError('Gagal memperbarui catatan. Id tidak ditemukan')
         }
-
     }
 
     async deleteNoteById(id) {
@@ -96,14 +102,13 @@ class NotesService {
         try {
             await this.verifyNoteOwner(noteId, userId);
         } catch (error) {
-            console.log("🚀4life -> file: NotesService.js -> line 100 -> NotesService -> verifyNoteAccess -> error -> ", { error });
             if (error instanceof NotFoundError) {
                 throw error;
             }
 
             try {
                 await this._collaborationService.verifyCollaborator(noteId, userId);
-            } catch (error) {
+            } catch {
                 throw error;
             }
         }
