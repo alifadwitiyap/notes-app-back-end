@@ -63,7 +63,7 @@ class CollaborationsHandler {
             return {
                 status: 'success',
                 message: 'Kolaborasi berhasil dihapus',
-            };
+            }; z
         } catch (error) {
             if (error instanceof ClientError) {
                 const response = h.response({

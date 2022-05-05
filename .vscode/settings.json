@@ -1,0 +1,28 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "old ( useless )": true,
+        "package-lock.json": true,
+        "NotesAPIPostmanFilesStarter (1).zip": true,
+        ".prod.env": true,
+        ".gitignore": true,
+        "node_modules": true,
+        ".vscode": true,
+        "Postman Test": true
+    },
+    "hide-files.files": [
+        "old ( useless )",
+        "package-lock.json",
+        "NotesAPIPostmanFilesStarter (1).zip",
+        ".prod.env",
+        ".gitignore",
+        "node_modules",
+        ".vscode",
+        "Postman Test"
+    ]
+}
